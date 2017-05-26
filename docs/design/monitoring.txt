@@ -1,0 +1,228 @@
+= Roles:
+
+* Messaging Service Operator
+
+* Messaging Tenant
+
+(Roles not considered in this context: OpenShift Administrator,
+Messaging Developer).
+
+A key goal of the monitoring capabilities is to make it easier for the
+messaging tenant to fix or improve issues with their specific system.
+
+= Key Concepts:
+
+* links (i.e. the communicating parties)
+
+* messages
+
+* addresses (or routes / pathways)
+
+* connections (groups of links with properties of interest such as ip
+  address, process name, user / identity)
+
+Note: Connections for MQTT would need to be handled differently from
+those for AMQP.
+
+== Data/Attributes of interest
+
+=== links
+
+* source and target
+* number of messages sent and received in last N minutes
+* break down of outcomes for transfers in the last N minutes
+* attached date-time
+* date-time of last transfer
+* some indication of credit? (may need to be more sophisticated than
+  just a snapshot of a point in time?)
+
+=== addresses
+
+* name
+* type
+* number of senders and receivers currently associated with it
+* number of messages sent and received in last N minutes
+* break down of outcomes for transfers in the last N minutes
+* date-time of last transfer
+* ability to drill in to links in more detail if required
+
+=== connections
+
+* container id
+* hostname / ip address
+* user
+* encrypted / unencrypted
+* properties
+* connection date-time
+* ability to drill in to links in more detail if required
+
+= Goals:
+
+* observe and understand message flows
+
+  ** most active addresses
+
+  ** addresses with most links
+
+  ** most active connections
+
+  ** connections with most links
+
+  ** relative activity between addresses
+
+  ** relative activity between connections
+
+  ** drill in to links by address and connection
+
+  ** patterns over time:
+
+    *** trends, spikes, cycles
+
+    *** in aggregate, by address, (by connection?)
+
+* spot potential issues
+
+  Want to make the following easy to spot.
+
+  ** queues backing up
+
+  ** senders blocked waiting for credit
+
+  ** inactive durable subscribers
+
+  ** high proportion of non-accepted outcomes
+
+  ** message stuck in queue
+
+  ** inactive addresses
+
+  ** inactive connections
+
+* analyse / troubleshoot 'semantic' problems
+
+  ** messages 'lost' (i.e. not arriving where expected)
+
+  ** unexpected messages
+
+  ** messages 'reappearing'
+
+  ** routing semantics not as expected
+
+  ** correlate errors and warnings from logs to addresses and
+    connections in console
+
+* analyse / troubleshoot performance related issues
+
+* analyse past issues?
+
+= Impact of scale:
+
+* large number of addresses (particularly relevant when considering
+  on-demand addresses, see question below, but relevant even where
+  e.g. have hundreds of statically configured queues)
+
+* large numbers of connections
+
+* large number of links associated with given address (large number of
+  links associated with a connection is probably less common)
+
+Need to be able to filter the particular set of each of these entities
+that are displayed. (The current screens allow for filtering of
+addresses and connections, but not of links associated with either of
+these).
+
+== Filter addresses by:
+
+* name (pattern)
+* type
+* first N items based on particular sorting criteria
+
+== Sort addresses by:
+
+* name?
+* number of senders
+* number of receivers
+* number of links (senders & receivers combined)
+* messages in last 1, 5, 10 mins
+* time since last active
+* time since last inactive
+
+== Filter connections by:
+
+* container id (pattern)
+* ip address / hostname (pattern)
+* user
+* encrypted / unencrypted
+* first N items based on particular sorting criteria
+
+== Sort connections by:
+
+* container id? hostname?
+* number of senders
+* number of receivers
+* number of links (senders & receivers combined)
+* messages in last 1, 5, 10 mins
+* age (i.e. time connected)
+* time since last active
+* time since last inactive
+
+Do we want to support paging, or is filtering and sorting sufficient?
+E.g. perhaps have a configurable maximum results.
+
+The pie charts of messages/senders/receivers by address in the current
+dashboard will also not work for larger numbers of addresses. However
+showing comparative data for addresses (or connections) can be
+valuable (e.g. in showing where load is coming from, or even showing
+up unexpected flows).  Could perhaps show 'top 5' along with 'all the
+rest'?
+
+= Sources of data:
+
+* management queries on routers, brokers, mqtt gateway etc
+
+* metrics stored in hawkular db
+
+* logs
+
+Ideally relevant data from all these sources should be made available
+through the same console. (Though full access may require other,
+source specific mechanisms).
+
+Is there anything available through direct management queries that
+could not be stored in hawkular? I.e. could we reduce the list above
+to the last two items? If it were feasible it would make it possible
+to 'set' the console to any past time and give a uniform way to
+explore past and present.
+
+= Basic structure / layout of console:
+
+Currently have dashboard, address view, connection view. (There is
+also a user view, but that perhaps can be removed when we move to
+using keycloak).
+
+Should there be a link view as opposed to having links under
+address/connection (or perhaps as a fallback when the number of links
+in question is large)?
+
+= Questions:
+
+* should addresses configured through enmasse be treated differently
+  from dynamic/on-demand addresses? (At present only configured
+  addresses are dispalyed in the address view, I think this is not the
+  right approach. However showing all addresses the router is aware of
+  would alter the scale significantly, e.g. where there is a handful
+  of configured addresses but some of these have thousands of
+  subscribers using the mqtt gateway which creates a unique address
+  per subscriber.
+
+* should stats be 'rolled up' in any way for hierarchical addresses?
+  if so how do we identify hierarchical address? treat '/' as special?
+
+* should we provide any way of viewing particular messages in queues?
+
+* provide simple programmatic access to the data dispalyed in the
+  console?
+
+* configurable alerts?
+
+* how to best support other protocols?
