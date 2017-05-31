@@ -10,6 +10,26 @@ Messaging Developer).
 A key goal of the monitoring capabilities is to make it easier for the
 messaging tenant to fix or improve issues with their specific system.
 
+=== Messaging Service Operators needs
+
+The messaging service operator's needs are considered to be mostly a
+superset of those of the messaging tenant. However it could be
+desirable to be able to prevent a messaging service operator from
+actually accessing messages for a given tenant.
+
+The messaging service operator needs information on all the
+pods/containers categorised by the tenant (or whether the pod is
+shared between all tenants) and component/function
+(e.g. router/broker). (This is all available from openshift).
+
+They may also need access to the management capabilities of the
+routers and brokers (though as above, it might be desirable to
+restrict their ability to see or move/delete/consume messages).
+
+They should have access to logs for all components. (Available through
+openshift, but this is an area that some work is required in order to
+make it easier to find issues and correlate logs).
+
 = Key Concepts:
 
 * links (i.e. the communicating parties)
