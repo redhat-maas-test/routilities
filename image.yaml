@@ -1,0 +1,33 @@
+version: 1.0
+name: jboss-amqmaas-1-tech-preview/amqmaas10-console-openshift
+from: jboss/base-rhel7:1.0
+user: 185
+dogen:
+    version: "2.0.1"
+    ssl_verify: false
+cmd:
+    - "/opt/console/bin/launch.sh"
+
+packages:
+    - rh-nodejs4
+    - cyrus-sasl-lib
+
+sources:
+    - artifact: console-latest.tar.gz
+           
+scripts:    
+    - package: console
+      exec: install
+    - package: console
+      exec: prepare.sh
+      user: 185
+
+envs:
+    - name: "NODE_PATH"
+      value: "/usr/lib/node_modules"
+    - name: "DISTRO_NAME"
+      value: "console-latest"
+ports:
+    - value: 56720 
+    - value: 8080
+    - value: 80
